@@ -3,6 +3,7 @@ from flask_mysqldb import MySQL
 import MySQLdb.cursors
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
+import os
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -146,9 +147,9 @@ def reset_password(token):
 
 
 if __name__ == "__main__":
-    import os
     port = int(os.environ.get("PORT",5000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
