@@ -3,22 +3,15 @@ from flask_mysqldb import MySQL
 import MySQLdb.cursors
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
-import os
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
- # MySQL configuration
-# app.config['MYSQL_HOST'] = 'localhost'
-# app.config['MYSQL_USER'] = 'root'
-# app.config['MYSQL_PASSWORD'] = ''
-# app.config['MYSQL_DB'] = 'flask_login'
-
-app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST')
-app.config['MYSQL_USER'] = os.environ.get('MYSQL_USER')
-app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD')
-app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB')
-app.config['MYSQL_PORT'] = int(os.environ.get('MYSQL_PORT', 3306))
+# MySQL configuration
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_DB'] = 'flask_login'
 
 mysql = MySQL(app)
 
@@ -42,6 +35,7 @@ def home():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        username = request.form['username']
         email = request.form['email']
         password = request.form['password']
         repassword = request.form['repassword']
@@ -57,7 +51,7 @@ def register():
         if account:
             flash('Email already exists!', 'danger')
         else:
-            cursor.execute("INSERT INTO users (email, password) VALUES (%s, %s)", (email, password))
+            cursor.execute("INSERT INTO users (email, password,username) VALUES (%s, %s,%s)", (email, password,username))
             mysql.connection.commit()
             flash('Registration successful!', 'success')
             return redirect(url_for('login'))
@@ -68,6 +62,7 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
+        username = request.form['username']
         email = request.form['email']
         password = request.form['password']
         
@@ -77,6 +72,7 @@ def login():
         
         if user:
             session['email'] = user['email']
+            session['username'] = user['username']
             # flash('Login successful!', 'success')
             return redirect(url_for('dashboard'))
         else:
@@ -88,13 +84,14 @@ def login():
 @app.route('/dashboard')
 def dashboard():
     if 'email' in session:
-        return render_template('dashboard.html', username=session['email'])
+        return render_template('dashboard.html', username=session['username'], email=session['email'])
     else:
         return redirect(url_for('login'))
 
 
 @app.route('/logout')
 def logout():
+    session.pop('username', None)
     session.pop('email', None)
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
@@ -152,15 +149,5 @@ def reset_password(token):
     return render_template('reset_password.html', token=token)
 
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT",5000))
-    app.run(host="0.0.0.0", port=port)
-
-
-
-
-
-
-
-
-
+if __name__ == '__main__':
+    app.run(debug=True)
