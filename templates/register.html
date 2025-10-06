@@ -8,11 +8,11 @@
         .flash-messages {
     display: flex;
     justify-content: center; /* horizontally center */
-    margin-top: 15px;
+    margin-top: 2px;
 }
 
 .flash {
-    padding: 10px 20px;
+    padding: 5px 5px;
     border-radius: 5px;
     font-weight: bold;
     text-align: center; /* center text inside box */
@@ -41,7 +41,7 @@
 
          body {
             font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
+            
         }
         .register-container {
             width: 400px;
@@ -55,7 +55,7 @@
             text-align: center;
             margin-bottom: 25px;
         }
-        .register-container input[type="email"],
+        .register-container input[type="text"],
         .register-container input[type="email"],
         .register-container input[type="password"] {
             width: 90%;
@@ -92,14 +92,17 @@
     <div class="register-container">
         <h2>Create Account</h2>
         <form  method="POST">
-            <label>Email:</label><br>
-        <input type="email" name="email" required><br><br>
-        
-        <label>Password:</label><br>
-        <input type="password" name="password" required><br><br>
+             <label>username:</label>
+        <input type="text" name="username" required>
 
-        <label>Re-enter Password:</label><br>
-        <input type="password" name="repassword" required><br><br>
+            <label>Email:</label>
+        <input type="email" name="email" required>
+        
+        <label>Password:</label>
+        <input type="password" name="password" required>
+
+        <label>Re-enter Password:</label>
+        <input type="password" name="repassword" required>
         
         <input type="submit" value="Register">
     
