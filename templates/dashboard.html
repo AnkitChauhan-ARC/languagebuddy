@@ -18,10 +18,10 @@
 
             <div class="profile-container">
                 <button id="profile-btn">
-                    <span class="profile-icon">👤</span> Profile
+                    <span class="profile-icon">👤</span> {{ username }}
                 </button>
                 <div id="profile-dropdown" class="hidden">
-                <span id="profile-email"><p>Logged in as: {{ email }}</p></span>
+                <span id="profile-email"><p> {{ email }} </p></span>
                         
                   <form action="{{ url_for('logout') }}" method="GET">
                   <button id="logout-btn" type="submit">Logout</button>
