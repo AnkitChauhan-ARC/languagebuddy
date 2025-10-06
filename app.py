@@ -3,24 +3,31 @@ from flask_mysqldb import MySQL
 import MySQLdb.cursors
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
 
-# MySQL configuration
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'flask_login'
+# Secret key from environment
+app.secret_key = os.getenv('SECRET_KEY', 'fallback-secret')
+
+# MySQL configuration (read from .env)
+app.config['MYSQL_HOST'] = os.getenv('MYSQL_HOST')
+app.config['MYSQL_USER'] = os.getenv('MYSQL_USER')
+app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
+app.config['MYSQL_DB'] = os.getenv('MYSQL_DB')
 
 mysql = MySQL(app)
 
-# Flask-Mail configuration (use your Gmail + App Password here)
+# Flask-Mail configuration (read from .env)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'chauhanankit5090@gmail.com'
-app.config['MAIL_PASSWORD'] = 'kqgj sbwg xkyr yrcd'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 
 mail = Mail(app)
 # Serializer for tokens
@@ -51,7 +58,10 @@ def register():
         if account:
             flash('Email already exists!', 'danger')
         else:
-            cursor.execute("INSERT INTO users (email, password,username) VALUES (%s, %s,%s)", (email, password,username))
+            cursor.execute(
+                "INSERT INTO users (email, password, username) VALUES (%s, %s, %s)",
+                (email, password, username)
+            )
             mysql.connection.commit()
             flash('Registration successful!', 'success')
             return redirect(url_for('login'))
@@ -62,7 +72,6 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
         email = request.form['email']
         password = request.form['password']
         
@@ -73,7 +82,6 @@ def login():
         if user:
             session['email'] = user['email']
             session['username'] = user['username']
-            # flash('Login successful!', 'success')
             return redirect(url_for('dashboard'))
         else:
             flash('Invalid email or password!', 'danger')
@@ -97,7 +105,6 @@ def logout():
     return redirect(url_for('login'))
 
 
-
 # ---------------- Password Reset Feature ---------------- #
 @app.route('/forgot', methods=['GET', 'POST'])
 def forgot():
@@ -111,7 +118,6 @@ def forgot():
             token = s.dumps(email, salt='password-reset-salt')
             reset_url = url_for('reset_password', token=token, _external=True)
 
-            # Send email
             msg = Message("Password Reset Request",
                           sender=app.config['MAIL_USERNAME'],
                           recipients=[email])
@@ -127,7 +133,7 @@ def forgot():
 @app.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     try:
-        email = s.loads(token, salt='password-reset-salt', max_age=1800)  # 30 min
+        email = s.loads(token, salt='password-reset-salt', max_age=1800)
     except:
         flash("The reset link is invalid or has expired.", "danger")
         return redirect(url_for('forgot'))
